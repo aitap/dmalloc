@@ -30,6 +30,9 @@
 #if HAVE_SYS_MMAN_H
 #  include <sys/mman.h>				/* for mmap stuff */
 #endif
+#ifdef _WIN32
+#  include <memoryapi.h>
+#endif
 
 #define DMALLOC_DISABLE
 
@@ -95,6 +98,9 @@ static	void	*heap_extend(const int incr)
 #else
 #if HAVE_SBRK
   ret = sbrk(incr);
+#elif defined(_WIN32)
+  ret = VirtualAlloc(NULL, incr, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+  if (!ret) ret = SBRK_ERROR;
 #endif /* if HAVE_SBRK */
 #endif /* if not HAVE_MMAP && USE_MMAP */
 #endif /* if not INTERNAL_MEMORY_SPACE */
@@ -149,6 +155,12 @@ static	void	heap_release(void *addr, const int size)
     dmalloc_message("munmap failed to release heap memory %p, size %d",
 		    addr, size);
   }
+#elif defined(_WIN32)
+  /* NB: Assuming that heap_release is always called with the same size as
+  ** heap_extend. WinAPI requires the second parameter to VirtualFree
+  ** to be 0 to avoid reserving and then abandoning blocks of uncommitted
+  ** address space. */
+  VirtualFree(addr, 0, MEM_RELEASE);
 #else
   /* no-op */
 #endif /* if not HAVE_MMAP && USE_MMAP */
