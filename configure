@@ -4677,7 +4677,39 @@ fi
 done
 
 
-if test "x$ac_cv_func_mmap" != "xyes" && test "x$ac_cv_func_sbrk" != "xyes"; then
+ac_cv_target_win32=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether target OS is Windows" >&5
+$as_echo_n "checking whether target OS is Windows... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef _WIN32
+ /* success */
+#else
+ #error Not on WIN32
+#endif
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }; ac_cv_target_win32=yes
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; };  ac_cv_target_win32=no
+
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+
+if test "x$ac_cv_func_mmap" != "xyes" && test "x$ac_cv_func_sbrk" != "xyes" && \
+	test "x$ac_cv_target_win32" != "xyes";
+then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: " >&5
 $as_echo "$as_me: WARNING: " >&2;}
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no mmap nor sbrk function.  See INTERNAL_MEMORY_SPACE in settings.dist." >&5

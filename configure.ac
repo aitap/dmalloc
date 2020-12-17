@@ -345,7 +345,22 @@ AC_MSG_NOTICE([important functionality])
 
 AC_CHECK_FUNCS(mmap munmap sbrk)
 
-if test "x$ac_cv_func_mmap" != "xyes" && test "x$ac_cv_func_sbrk" != "xyes"; then
+ac_cv_target_win32=no
+AC_MSG_CHECKING([whether target OS is Windows])
+AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
+#ifdef _WIN32
+ /* success */
+#else
+ #error Not on WIN32
+#endif
+]])],
+ [ AC_MSG_RESULT([yes]); ac_cv_target_win32=yes ],
+ [ AC_MSG_RESULT([no]);  ac_cv_target_win32=no  ]
+)
+
+if test "x$ac_cv_func_mmap" != "xyes" && test "x$ac_cv_func_sbrk" != "xyes" && \
+	test "x$ac_cv_target_win32" != "xyes";
+then
 	AC_MSG_WARN()
 	AC_MSG_WARN(no mmap nor sbrk function.  See INTERNAL_MEMORY_SPACE in settings.dist.)
 	AC_MSG_WARN()
